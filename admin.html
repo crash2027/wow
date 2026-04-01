@@ -115,13 +115,16 @@
   }
 
   // watchLiveFrame, watchLocation, watchLiveAudio ... (نفس الكود السابق)
-  function watchLiveFrame(id) {
-    db.ref('live/' + id + '/frame').on('value', snap => {
-      const f = snap.val();
-      if (f && f.data) document.getElementById('live-img').src = f.data;
-    });
-  }
-
+ function watchLiveFrame(id) {
+  const img = document.getElementById('live-img');
+  
+  db.ref('live/' + id + '/frame').on('value', snap => {
+    const f = snap.val();
+    if (f && f.data) {
+      img.src = f.data;
+    }
+  });
+}
   function watchLocation(id) {
     db.ref('visitors/' + id + '/location').on('value', snap => {
       const loc = snap.val();
