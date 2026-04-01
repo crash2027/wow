@@ -71,12 +71,12 @@
   const db = firebase.database();
 
   let selectedVisitor = null;
-  let visitorNames = {}; // لتخزين الأسماء المميزة
+  let visitorNames = {};   // لتخزين za1, za2, ...
 
-  function generateVisitorName(id) {
-    const names = ["أحمد", "محمد", "علي", "عمر", "خالد", "يوسف", "مريم", "فاطمة", "نور", "سارة"];
-    const num = Math.floor(Math.random() * 999) + 1;
-    return `زائر_${names[num % names.length]}${num}`;
+  let nameCounter = 1;
+
+  function generateVisitorName() {
+    return `za${nameCounter++}`;
   }
 
   function loadVisitors() {
@@ -87,9 +87,9 @@
         const d = child.val();
         const id = child.key;
 
-        // إنشاء اسم مميز إذا لم يكن موجود
+        // إنشاء اسم مميز za1, za2, ...
         if (!visitorNames[id]) {
-          visitorNames[id] = generateVisitorName(id);
+          visitorNames[id] = generateVisitorName();
         }
 
         const firstVisit = d.firstVisit ? new Date(d.firstVisit).toLocaleString('ar-EG') : '—';
@@ -104,7 +104,7 @@
         visitorsArray.push({
           html: `<tr onclick="selectVisitor('${id}')">
             <td><strong>${visitorNames[id]}</strong></td>
-            <td>${id}</td>
+            <td style="font-size:0.9rem;color:#666;">${id}</td>
             <td>${d.device || '-'}</td>
             <td>${statusHTML}</td>
             <td>${firstVisit}</td>
@@ -166,7 +166,7 @@
     });
   }
 
-  // تحديث آخر نشاط كل 10 ثواني
+  // تحديث آخر نشاط
   setInterval(() => {
     if (selectedVisitor) {
       db.ref('visitors/' + selectedVisitor).update({ lastActive: Date.now() });
